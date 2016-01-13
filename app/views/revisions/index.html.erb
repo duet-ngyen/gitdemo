@@ -1,0 +1,10 @@
+<% @revisions.each do |revision| %>
+  Revision: <%= revision.version_id %>
+  </br>
+  Title: <%= revision.title %>
+  </br>
+  Description: <%= revision.description %>
+  </br>
+  <%= link_to "diff", document_revision_compares_path(params[:document_id], revision.version_id) %>
+  <hr>
+<% end %>

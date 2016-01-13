@@ -1,0 +1,21 @@
+
+<% unless @change_title %>
+  <em>It the first revision</em>
+<% else %>
+  <% if @change_title != '<div class="diff"></div>' %>
+    <h6>Title was changed</h6>
+    <%= @change_title.html_safe %>
+  <% else %>
+    <h6>Title no change: </h6> <%= @current_revision.title %>
+  <% end %>
+<% end %>
+
+
+<% unless @change_description %>
+  <em>It the first revision</em>
+<% else %>
+  <% if @change_description != '<div class="diff"></div>' %>
+    <h6>Description was changed</h6>
+    <%= @change_description.html_safe %>
+  <% end %>
+<% end %>
