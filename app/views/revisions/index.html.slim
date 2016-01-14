@@ -1,11 +1,27 @@
-- @revisions.each do |revision|
-  |  Revision:
-  = revision.version_id
-  |  Title:
-  = revision.title
-  |  Description:
-  = revision.description
-  = link_to "diff", document_revision_compares_path(params[:document_id], revision.version_id)
-  = link_to document_path(@document, action: :update, ver_restore: revision.id), method: :patch do
-    = t "restore"
-  hr
+#revisions
+  table.ui.celled.striped.table
+    thead
+      tr
+        th.version
+          | Revision
+        th.title
+          | Title
+        th.description
+          | Description
+        th[colspan="2"]
+    tbody
+    - @revisions.each do |revision|
+      tr
+        td.version
+          = revision.version_id
+        td.title
+          = revision.title
+        td.description
+          = revision.description
+        td.action
+          <!-- = link_to "diff", document_revision_compares_path(params[:document_id], revision.version_id) -->
+          = link_to "diff", document_revision_path(params[:document_id], revision.version_id,
+            compare_with_previous: true)
+        td.action
+          = link_to document_path(@document, action: :update, ver_restore: revision.id), method: :patch do
+            = t "restore"
