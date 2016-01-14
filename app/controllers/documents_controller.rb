@@ -30,26 +30,36 @@ class DocumentsController < ApplicationController
 
     @revision = Revision.new(revision_params)
     @revision.save
-    @revision.update_attributes(doc_id: @document.id, version_id: 1)
+    @revision.update_attributes(document_id: @document.id, version_id: 1)
 
   end
 
   def update
-    respond_to do |format|
-      if @document.update(document_params)
-        format.html { redirect_to @document, notice: 'Document was successfully updated.' }
-        format.json { render :show, status: :ok, location: @document }
-      else
-        format.html { render :edit }
-        format.json { render json: @document.errors, status: :unprocessable_entity }
+    unless params[:ver_restore].present?
+      respond_to do |format|
+        if @document.update(document_params)
+          format.html { redirect_to @document, notice: 'Document was successfully updated.' }
+          format.json { render :show, status: :ok, location: @document }
+        else
+          format.html { render :edit }
+          format.json { render json: @document.errors, status: :unprocessable_entity }
+        end
       end
+
+      @revision = Revision.new(revision_params)
+      @revision.save
+      version_id = Revision.where(document_id: params[:id]).order(id: :desc).first.version_id
+      @revision.update_attributes(document_id: params[:id], version_id: version_id + 1)
+    else
+      binding.pry
+      @document = Document.find_by id: params[:id]
+      @restore_revision = Revision.find_by(id: params[:ver_restore])
+      @document.update_attributes(title: @restore_revision.title,
+        description: @restore_revision.description)
+      Revision.create(title: @restore_revision.title, description: @restore_revision.description,
+         document_id: params[:id], version_id: @document.revisions.last.version_id.to_i + 1)
+      redirect_to @document
     end
-
-    @revision = Revision.new(revision_params)
-    @revision.save
-    version_id = Revision.where(doc_id: params[:id]).order(id: :desc).first.version_id
-    @revision.update_attributes(doc_id: params[:id], version_id: version_id + 1)
-
   end
 
   def destroy
@@ -60,7 +70,11 @@ class DocumentsController < ApplicationController
     end
   end
 
-  def compare
+  def restore
+    binding.pry
+    @document = Document.find_by(id: params[:document_id])
+
+    redirect_to documents_path
   end
 
   private

@@ -21,12 +21,14 @@ ActiveRecord::Schema.define(version: 20160113032727) do
   end
 
   create_table "revisions", force: :cascade do |t|
-    t.integer  "doc_id"
     t.string   "title"
     t.text     "description"
+    t.integer  "document_id"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
     t.integer  "version_id"
   end
+
+  add_index "revisions", ["document_id"], name: "index_revisions_on_document_id"
 
 end

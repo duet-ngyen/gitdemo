@@ -1,7 +1,7 @@
 class ComparesController < ApplicationController
   def index
-    @revisions_of_doc = Revision.where(doc_id: params[:document_id])
-    @current_revision = Revision.find_by(doc_id: params[:document_id],
+    @revisions_of_doc = Revision.where(document_id: params[:document_id])
+    @current_revision = Revision.find_by(document_id: params[:document_id],
       version_id: params[:revision_id])
     @previous_revision = @revisions_of_doc.order(:version_id).
       limit(params[:revision_id].to_i - 1).last
@@ -11,8 +11,7 @@ class ComparesController < ApplicationController
         @current_revision.title).to_s(:html_simple)
 
       @change_description = Diffy::Diff.new(@previous_revision.description,
-        @current_revision.description,
-        :include_plus_and_minus_in_html => true).to_s(:html_simple)
+        @current_revision.description).to_s(:html_simple)
     end
   end
 end
