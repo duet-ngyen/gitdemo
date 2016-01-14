@@ -27,11 +27,7 @@ class DocumentsController < ApplicationController
         format.json { render json: @document.errors, status: :unprocessable_entity }
       end
     end
-
-    @revision = Revision.new(revision_params)
-    @revision.save
-    @revision.update_attributes(document_id: @document.id, version_id: 1)
-
+    create_revision(revision_params, 1, @document.id)
   end
 
   def update
@@ -45,13 +41,10 @@ class DocumentsController < ApplicationController
           format.json { render json: @document.errors, status: :unprocessable_entity }
         end
       end
-
-      @revision = Revision.new(revision_params)
-      @revision.save
-      version_id = Revision.where(document_id: params[:id]).order(id: :desc).first.version_id
-      @revision.update_attributes(document_id: params[:id], version_id: version_id + 1)
+      version_id = @document.revisions.last.version_id
+      new_version_id = version_id + 1
+      create_revision(revision_params, new_version_id, params[:id])
     else
-      binding.pry
       @document = Document.find_by id: params[:id]
       @restore_revision = Revision.find_by(id: params[:ver_restore])
       @document.update_attributes(title: @restore_revision.title,
@@ -70,13 +63,6 @@ class DocumentsController < ApplicationController
     end
   end
 
-  def restore
-    binding.pry
-    @document = Document.find_by(id: params[:document_id])
-
-    redirect_to documents_path
-  end
-
   private
     def set_document
       @document = Document.find(params[:id])
@@ -88,5 +74,11 @@ class DocumentsController < ApplicationController
 
     def revision_params
       params.require(:document).permit(:title, :description)
+    end
+
+    def create_revision params, version_id, document_id
+      @revision = Revision.new(params)
+      @revision.save
+      @revision.update_attributes(document_id: document_id, version_id: version_id)
     end
 end

@@ -1,10 +1,9 @@
 class ComparesController < ApplicationController
   def index
-    @revisions_of_doc = Revision.where(document_id: params[:document_id])
-    @current_revision = Revision.find_by(document_id: params[:document_id],
-      version_id: params[:revision_id])
-    @previous_revision = @revisions_of_doc.order(:version_id).
-      limit(params[:revision_id].to_i - 1).last
+    @document = Document.find_by(id: params[:document_id])
+    @current_revision = @document.revisions.find_by(version_id: params[:revision_id])
+    @previous_revision = @document.revisions.order(:version_id).
+      limit(params[:revision_id]).last(2).first
 
     if @current_revision.version_id > 1
       @change_title = Diffy::Diff.new(@current_revision.title,
