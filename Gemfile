@@ -11,6 +11,9 @@ gem "jbuilder", "~> 2.0"
 gem "sdoc", "~> 0.4.0", group: :doc
 gem "diffy"
 gem "pry"
+gem 'semantic-ui-sass', github: 'doabit/semantic-ui-sass'
+gem 'slim'
+gem 'slim-rails'
 
 group :development, :test do
   gem "byebug"

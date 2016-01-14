@@ -1,0 +1,15 @@
+p#notice
+  = notice
+p
+  strong
+    | Title:
+  = @document.title
+
+p
+  strong
+  | Desc:
+  = @document.description
+
+= link_to 'Edit', edit_document_path(@document)
+| |
+= link_to 'Back', documents_path

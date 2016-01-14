@@ -1,0 +1,26 @@
+- unless @change_title
+  em
+    | It the first revision, no previous version to compare title
+- else
+  - if @change_title == '<div class="diff"></div>'
+    h6
+      | Title no change:
+    = @current_revision.title
+  - else
+    h6
+      | Title was changed
+    = @change_title.html_safe
+
+- unless @change_description
+  em
+    br
+    | It the first revision, no previous version to compare description
+- else
+  - if @change_description == '<div class="diff"></div>'
+    h6
+      | Description no change:
+    = @current_revision.description
+  - else
+    h6
+      | Description was changed
+    = @change_description.html_safe

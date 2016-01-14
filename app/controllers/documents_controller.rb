@@ -45,7 +45,6 @@ class DocumentsController < ApplicationController
       new_version_id = version_id + 1
       create_revision(revision_params, new_version_id, params[:id])
     else
-      @document = Document.find_by id: params[:id]
       @restore_revision = Revision.find_by(id: params[:ver_restore])
       @document.update_attributes(title: @restore_revision.title,
         description: @restore_revision.description)
