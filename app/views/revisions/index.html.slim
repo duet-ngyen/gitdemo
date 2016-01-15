@@ -19,9 +19,9 @@
         td.description
           = revision.description
         td.action
-          <!-- = link_to "diff", document_revision_compares_path(params[:document_id], revision.version_id) -->
           = link_to "diff", document_revision_path(params[:document_id], revision.version_id,
             compare_with_previous: true)
         td.action
-          = link_to document_path(@document, action: :update, ver_restore: revision.id), method: :patch do
-            = t "restore"
+          - unless revision == @revisions.first
+            = link_to document_path(@document, action: :update, ver_restore: revision.id), method: :patch do
+              = t "restore"

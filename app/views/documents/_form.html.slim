@@ -9,6 +9,7 @@
           - @document.errors.full_messages.each do |message|
             li
               = message
+    = f.hidden_field :lastest_revision, value: @document.lastest_revision
     .field
       = f.label :title
       br

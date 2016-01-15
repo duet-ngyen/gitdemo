@@ -1,0 +1,13 @@
+- flash.each do |name, msg|
+  - type = case name
+  - when "success"
+    - "positive"
+  - when "error"
+    - "negative"
+  - else
+    - "teal"
+
+  div class="ui #{type} message"
+    i class="close icon"
+    .header
+      = msg

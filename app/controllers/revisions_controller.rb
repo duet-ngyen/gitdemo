@@ -8,7 +8,8 @@ class RevisionsController < ApplicationController
   end
 
   def show
-    if params[:compare_with_previous].present?
+    @compare_with_previous = params[:compare_with_previous]
+    if @compare_with_previous == "true"
       @document = Document.find_by(id: params[:document_id])
       @current_revision = @document.revisions.find_by(version_id: params[:id])
       @previous_revision = @document.revisions.order(:version_id).

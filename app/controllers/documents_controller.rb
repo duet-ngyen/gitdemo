@@ -13,6 +13,8 @@ class DocumentsController < ApplicationController
   end
 
   def edit
+    $document = Document.find_by(id: params[:id])
+    @data = {document: @document}
   end
 
   def create
@@ -28,26 +30,81 @@ class DocumentsController < ApplicationController
       end
     end
     create_revision(revision_params, 1, @document.id)
+    @document.update_attributes(lastest_revision: @document.revisions.last.version_id)
   end
 
   def update
     unless params[:ver_restore].present?
-      respond_to do |format|
-        if @document.update(document_params)
-          format.html { redirect_to @document, notice: 'Document was successfully updated.' }
-          format.json { render :show, status: :ok, location: @document }
+      if (params[:document][:lastest_revision].to_i + 1) > @document.revisions.last.version_id
+        respond_to do |format|
+          if @document.update(document_params)
+            format.html { redirect_to @document, notice: 'Document was successfully updated.' }
+            format.json { render :show, status: :ok, location: @document }
+          else
+            format.html { render :edit }
+            format.json { render json: @document.errors, status: :unprocessable_entity }
+          end
+        end
+        version_id = @document.revisions.last.version_id
+        new_version_id = version_id + 1
+        create_revision(revision_params, new_version_id, params[:id])
+        @document.update_attributes(lastest_revision: @document.revisions.last.version_id)
+      else
+        if @document.description.strip != params[:document][:description].strip
+          @original = @document.description
+          @current  = params[:document][:description]
+          @diff = Differ.diff_by_line(@current, @original)
+          @document.description = @diff
+          @result = ""
+          conflict = false
+          @document.description.split("\n").each do |line|
+            match_line = /(.*){(.*)}(.*)/.match(line)
+            if match_line
+              @result.concat(match_line[1]).concat("\n")
+              line_change = /\"(.*)\" >> \"(.*)\"/.match(match_line[2])
+              line_add = /[\+]\"(.*)\"/.match(match_line[2])
+              line_remove = /[\-]\"(.*)\"/.match(match_line[2])
+              if line_change
+                binding.pry
+                @result.concat("<<<<< HEAD \n").concat(line_change[1]).concat("\n =====\n").concat(line_change[2]).concat("\n >>>>> your change\n")
+                conflict = true
+              elsif line_add
+                @result.concat(line_add[1])
+              elsif line_remove
+                @result.concat(line_remove[1])
+              end
+              # @result.concat(match_line[2]).concat("\n")
+              @result.concat(match_line[3])
+            else
+              @result.concat(line)
+            end
+          end
+
+          if conflict
+            @document.description = @result
+            @result.gsub!("\\n","\n").gsub!("\\r","\r")
+            @document.update_attributes(lastest_revision: @document.revisions.last.version_id)
+            flash[:warning] = "Conflicted"
+            render :edit
+          else
+            @result.gsub!("\\n","\n").gsub!("\\r","\r")
+            @document.update_attributes(description: @result)
+            version_id = @document.revisions.last.version_id
+            new_version_id = version_id + 1
+            create_revision(revision_params, new_version_id, params[:id])
+            @document.update_attributes(lastest_revision: Revision.last.version_id)
+            redirect_to @document
+            flash[:warning] = "Auto merged"
+          end
         else
-          format.html { render :edit }
-          format.json { render json: @document.errors, status: :unprocessable_entity }
+          flash[:warning] = "Auto merged"
+          redirect_to @document
         end
       end
-      version_id = @document.revisions.last.version_id
-      new_version_id = version_id + 1
-      create_revision(revision_params, new_version_id, params[:id])
     else
       @restore_revision = Revision.find_by(id: params[:ver_restore])
       @document.update_attributes(title: @restore_revision.title,
-        description: @restore_revision.description)
+        description: @restore_revision.description, lastest_revision: @document.lastest_revision + 1)
       Revision.create(title: @restore_revision.title, description: @restore_revision.description,
          document_id: params[:id], version_id: @document.revisions.last.version_id.to_i + 1)
       redirect_to @document
@@ -68,7 +125,7 @@ class DocumentsController < ApplicationController
     end
 
     def document_params
-      params.require(:document).permit(:title, :description)
+      params.require(:document).permit(:title, :description, :lastest_revision)
     end
 
     def revision_params
