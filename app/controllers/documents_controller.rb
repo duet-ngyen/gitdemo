@@ -41,15 +41,14 @@ class DocumentsController < ApplicationController
           if @document.update(document_params)
             format.html { redirect_to @document, notice: 'Document was successfully updated.' }
             format.json { render :show, status: :ok, location: @document }
+            new_version_id = @document.revisions.last.version_id + 1
+            create_revision(revision_params, new_version_id, params[:id])
+            @document.update_attributes(lastest_revision: @document.revisions.last.version_id)
           else
             format.html { render :edit }
             format.json { render json: @document.errors, status: :unprocessable_entity }
           end
         end
-        version_id = @document.revisions.last.version_id
-        new_version_id = version_id + 1
-        create_revision(revision_params, new_version_id, params[:id])
-        @document.update_attributes(lastest_revision: @document.revisions.last.version_id)
       else
         if @document.description.strip != params[:document][:description].strip
           @original = @document.description
@@ -86,7 +85,8 @@ class DocumentsController < ApplicationController
         description: @restore_revision.description, lastest_revision: @document.lastest_revision + 1)
       Revision.create(title: @restore_revision.title, description: @restore_revision.description,
          document_id: params[:id], version_id: @document.revisions.last.version_id.to_i + 1)
-      redirect_to @document
+      redirect_to document_revisions_path(@document.id)
+      flash[:warning] = "Document was restored to the same version: #{@restore_revision.version_id}"
     end
   end
 

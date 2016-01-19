@@ -4,11 +4,11 @@
       | It the first revision, no previous version to compare title
   - else
     - if @change_title == '<div class="diff"></div>'
-      h6
+      h5
         | Title no change:
       = @current_revision.title
     - else
-      h6
+      h5
         | Title was changed
       = @change_title.html_safe
 
@@ -18,10 +18,10 @@
       | It the first revision, no previous version to compare description
   - else
     - if @change_description == '<div class="diff"></div>'
-      h6
+      h5
         | Description no change:
       = @current_revision.description
     - else
-      h6
+      h5
         | Description was changed
-      = @change_description.html_safe
+      = simple_format @change_description

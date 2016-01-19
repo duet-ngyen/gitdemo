@@ -1,13 +1,14 @@
-p
-  strong
-    | Title:
-  = @document.title
+#show
+  #content
+    p
+      strong
+        | Title:
+      = @document.title
+    p
+      strong
+        | Description:
+      = simple_format @document.description
 
-p
-  strong
-  | Description:
-  = @document.description
-
-= link_to 'Edit', edit_document_path(@document)
-| |
-= link_to 'Back', documents_path
+<br>
+= link_to 'Edit', edit_document_path(@document), class: "ui button blue"
+= link_to 'Back', documents_path, class: "btn-black"

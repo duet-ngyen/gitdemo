@@ -1,1 +1,45 @@
 @import "semantic-ui";
+
+#header {
+  background-color: #44619D;
+  height: 50px;
+  color: white;
+  margin-bottom: 50px;
+
+  a:not(.default):link    { color: white; }
+  a:not(.default):visited { color: white; }
+  a:hover {
+    background: transparent;
+  }
+}
+
+#footer {
+  margin-top: 100px;
+  text-align: center;
+  background-color: #44619D;
+  height: 30px;
+  color: white;
+
+  .test {
+    padding-top: 5px;
+  }
+}
+
+#show {
+  border: 1px solid grey;
+  border-radius: 10px;
+
+  #content {
+    margin: 20px;
+  }
+}
+
+#container {
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.btn-black {
+  margin-left: 10px;
+}

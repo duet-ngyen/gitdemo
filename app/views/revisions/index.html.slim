@@ -17,11 +17,14 @@
         td.title
           = revision.title
         td.description
-          = revision.description
+          = simple_format revision.description
         td.action
-          = link_to "diff", document_revision_path(params[:document_id], revision.version_id,
-            compare_with_previous: true)
+          - if revision != @revisions.last
+            = link_to "diff", document_revision_path(params[:document_id], revision.version_id,
+              compare_with_previous: true), class: "ui button blue"
         td.action
           - unless revision == @revisions.first
-            = link_to document_path(@document, action: :update, ver_restore: revision.id), method: :patch do
+            = link_to document_path(@document, action: :update, ver_restore: revision.id),
+              class: "ui button orange", method: :patch do
               = t "restore"
+  = link_to "Back", documents_path

@@ -1,29 +1,24 @@
-h1
-  | Listing Documents
-table.ui.celled.striped.table
-  thead
-    tr
-      th.title
-        | Title
-      th
-        | Desc
-      th[colspan="4"]
-  tbody
-    - @documents.each do |document|
+#index
+  h1
+    | Listing Documents
+  table.ui.celled.striped.table
+    thead
       tr
-        td.title
-          = document.title
-        td
-          = document.description
-        td.action
-          = link_to 'Show', document
-        td.action
-          = link_to 'Edit', edit_document_path(document)
-        td.action
-          = link_to 'Destroy', document, method: :delete, data: { confirm: 'Are you sure?' }
-        td.action
-          = link_to "all revisions", document_revisions_path(document.id)
-br
-= link_to 'New Document', new_document_path
-
-
+        th.title
+          | Title
+        th[colspan="4"]
+    tbody
+      - @documents.order("id desc").each do |document|
+        tr
+          td.title
+            = document.title
+          td.action
+            = link_to 'Show', document, class: "ui blue submit button"
+          td.action
+            = link_to 'Edit', edit_document_path(document), class: "ui blue submit button"
+          td.action
+            = link_to 'Destroy', document, method: :delete, data: { confirm: 'Are you sure?' }, class: "ui red submit button"
+          td.action
+            = link_to "revisions", document_revisions_path(document.id), class: "ui blue submit button"
+  br
+  = link_to 'New Document', new_document_path, class: "ui blue submit button"

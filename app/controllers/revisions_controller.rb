@@ -15,11 +15,12 @@ class RevisionsController < ApplicationController
       @previous_revision = @document.revisions.order(:version_id).
         limit(params[:id]).last(2).first
       if @current_revision.version_id > 1
-        @change_title = Diffy::Diff.new(@previous_revision.title,
-          @current_revision.title).to_s(:html_simple)
+        @change_title = Differ.diff_by_line(@previous_revision.title,
+          @current_revision.title).format_as(:html)
+        # binding.pry
 
-        @change_description = Diffy::Diff.new(@previous_revision.description,
-          @current_revision.description).to_s(:html_simple)
+        @change_description = Differ.diff_by_line(@current_revision.description,
+          @previous_revision.description).format_as(:html)
       end
     end
   end
