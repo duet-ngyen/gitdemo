@@ -17,7 +17,6 @@ class RevisionsController < ApplicationController
       if @current_revision.version_id > 1
         @change_title = Differ.diff_by_line(@previous_revision.title,
           @current_revision.title).format_as(:html)
-        # binding.pry
 
         @change_description = Differ.diff_by_line(@current_revision.description,
           @previous_revision.description).format_as(:html)

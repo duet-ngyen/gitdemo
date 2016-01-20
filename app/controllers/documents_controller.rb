@@ -1,5 +1,6 @@
 class DocumentsController < ApplicationController
   include Confliction
+  include RestoreRevision
   before_action :set_document, only: [:show, :edit, :update, :destroy]
 
   def index
@@ -25,16 +26,17 @@ class DocumentsController < ApplicationController
       if @document.save
         format.html { redirect_to @document, notice: 'Document was successfully created.' }
         format.json { render :show, status: :created, location: @document }
+        create_revision(revision_params, 1, @document.id)
+        @document.update_attributes(lastest_revision: @document.revisions.last.version_id)
       else
         format.html { render :new }
         format.json { render json: @document.errors, status: :unprocessable_entity }
       end
     end
-    create_revision(revision_params, 1, @document.id)
-    @document.update_attributes(lastest_revision: @document.revisions.last.version_id)
   end
 
   def update
+    # @document.test
     unless params[:ver_restore].present?
       if (params[:document][:lastest_revision].to_i + 1) > @document.revisions.last.version_id
         respond_to do |format|
@@ -51,29 +53,8 @@ class DocumentsController < ApplicationController
         end
       else
         if @document.description.strip != params[:document][:description].strip
-          @original = @document.description
-          @current  = params[:document][:description]
-          @document.description = Differ.diff_by_line(@current, @original)
-          @result = ""
-          conflict = false
-          conflict = recoginze_conflict @document.description, @result, conflict
-
-          if conflict == true
-            @document.description = @result
-            @result = @result.gsub("\\r","\r").gsub("\\n","\n")
-            @document.update_attributes(lastest_revision: @document.revisions.last.version_id)
-            flash[:warning] = "Conflicted"
-            render :edit
-          else
-            @result = @result.gsub("\\r","\r").gsub("\\n","\n")
-            @document.update_attributes(description: @result)
-            version_id = @document.revisions.last.version_id
-            new_version_id = version_id + 1
-            create_revision(revision_params, new_version_id, params[:id])
-            @document.update_attributes(lastest_revision: Revision.last.version_id)
-            redirect_to @document
-            flash[:warning] = "Auto merged"
-          end
+          @document.description = Differ.diff_by_line(params[:document][:description], @document.description)
+          recoginze_conflict @document, @document.description
         else
           flash[:warning] = "Auto merged"
           redirect_to @document
@@ -81,12 +62,7 @@ class DocumentsController < ApplicationController
       end
     else
       @restore_revision = Revision.find_by(id: params[:ver_restore])
-      @document.update_attributes(title: @restore_revision.title,
-        description: @restore_revision.description, lastest_revision: @document.lastest_revision + 1)
-      Revision.create(title: @restore_revision.title, description: @restore_revision.description,
-         document_id: params[:id], version_id: @document.revisions.last.version_id.to_i + 1)
-      redirect_to document_revisions_path(@document.id)
-      flash[:warning] = "Document was restored to the same version: #{@restore_revision.version_id}"
+      restore_to @restore_revision, @document
     end
   end
 

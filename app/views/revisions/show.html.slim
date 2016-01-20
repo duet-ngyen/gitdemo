@@ -3,7 +3,7 @@
     em
       | It the first revision, no previous version to compare title
   - else
-    - if @change_title == '<div class="diff"></div>'
+    - if @change_title == @document.title
       h5
         | Title no change:
       = @current_revision.title
@@ -17,7 +17,7 @@
       br
       | It the first revision, no previous version to compare description
   - else
-    - if @change_description == '<div class="diff"></div>'
+    - if @change_description.strip == @document.description.strip
       h5
         | Description no change:
       = @current_revision.description
@@ -25,3 +25,4 @@
       h5
         | Description was changed
       = simple_format @change_description
+- binding.pry
